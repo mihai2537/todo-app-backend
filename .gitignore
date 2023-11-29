@@ -1,5 +1,8 @@
 HELP.md
 env.properties
+keypair.pem
+private.pem
+public.pem
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
