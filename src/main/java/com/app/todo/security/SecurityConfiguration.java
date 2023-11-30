@@ -1,5 +1,6 @@
 package com.app.todo.security;
 
+import com.app.todo.utils.RsaKeyProperties;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -29,11 +30,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration  {
-    private final CustomUserDetailsService userDetailsService;
     private final RsaKeyProperties rsaKeys;
 
-    public SecurityConfiguration(CustomUserDetailsService userDetailsService, RsaKeyProperties rsaKeys) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfiguration(RsaKeyProperties rsaKeys) {
         this.rsaKeys = rsaKeys;
     }
 
@@ -73,12 +72,12 @@ public class SecurityConfiguration  {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(rsaKeys.publicKey()).build();
+        return NimbusJwtDecoder.withPublicKey(rsaKeys.getPublicKey()).build();
     }
 
     @Bean
     public JwtEncoder jwtEncoder() {
-        JWK jwk = new RSAKey.Builder(rsaKeys.publicKey()).privateKey(rsaKeys.privateKey()).build();
+        JWK jwk = new RSAKey.Builder(rsaKeys.getPublicKey()).privateKey(rsaKeys.getPrivateKey()).build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }
