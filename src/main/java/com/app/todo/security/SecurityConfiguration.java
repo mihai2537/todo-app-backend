@@ -57,6 +57,7 @@ public class SecurityConfiguration  {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/admin/**").hasRole("ADMIN");
                     auth.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN");
+                    auth.requestMatchers(("/auth/**")).permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -66,7 +67,6 @@ public class SecurityConfiguration  {
                 .jwtAuthenticationConverter(jwtAuthenticationConverter());
 
         return http
-                .httpBasic(Customizer.withDefaults())
                 .build();
     }
 

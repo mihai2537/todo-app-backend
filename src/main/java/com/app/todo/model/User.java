@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User extends AuditableEntity {
-    @Column
+    @Column(unique = true)
     private String email;
 
     @Column
