@@ -1,6 +1,5 @@
 package com.app.todo.service;
 
-import org.hibernate.query.sqm.TemporalUnit;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -28,9 +27,9 @@ public class TokenService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
-                .expiresAt(now.plusSeconds(3600))
                 .subject(authentication.getName())
-                .claim("scope", scope)
+                .expiresAt(now.plusSeconds(3600 * 3))
+                .claim("roles", scope)
                 .build();
 
         return this.encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

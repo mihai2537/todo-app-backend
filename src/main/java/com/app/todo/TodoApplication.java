@@ -22,8 +22,8 @@ public class TodoApplication {
 	@Bean
 	CommandLineRunner commandLineRunner(UserRepository userRepository) {
 		return args -> {
-			userRepository.save(new User("admin@admin.com", "pass", "ROLE_ADMIN,ROLE_USER"));
-			userRepository.save(new User("user@user.com", "pass", "ROLE_USER"));
+			userRepository.save(new User("admin@admin.com", "pass", "ADMIN"));
+			userRepository.save(new User("user@user.com", "pass", "USER"));
 		};
 	}
 
