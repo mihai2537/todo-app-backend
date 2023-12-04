@@ -1,6 +1,8 @@
 package com.app.todo.controller;
 
+import com.app.todo.dto.request.LoginDto;
 import com.app.todo.dto.request.RegistrationDto;
+import com.app.todo.dto.response.LoginResponseDto;
 import com.app.todo.dto.response.UserRespDto;
 import com.app.todo.service.AuthenticationService;
 import com.app.todo.service.TokenService;
@@ -34,5 +36,10 @@ public class AuthController {
     @PostMapping("/register")
     public UserRespDto registerUser(@RequestBody RegistrationDto body) {
         return authService.registerUser(body.getEmail(), body.getPassword());
+    }
+
+    @PostMapping("/login")
+    public LoginResponseDto loginUser(@RequestBody LoginDto body) {
+        return authService.loginUser(body.getEmail(), body.getPassword());
     }
 }
