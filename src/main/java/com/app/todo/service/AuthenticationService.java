@@ -1,5 +1,6 @@
 package com.app.todo.service;
 
+import com.app.todo.dto.response.APIResponse;
 import com.app.todo.dto.response.LoginResponseDto;
 import com.app.todo.dto.response.UserRespDto;
 import com.app.todo.model.Role;
@@ -34,25 +35,26 @@ public class AuthenticationService {
         this.tokenService = tokenService;
     }
 
-    public UserRespDto registerUser(String email, String password) {
+    public APIResponse<UserRespDto> registerUser(String email, String password) {
         String encodedPassword = passwordEncoder.encode(password);
         Role role = Role.USER;
         User user = new User(email, encodedPassword, role.getValue());
         userRepo.save(user);
 
-        return new UserRespDto(user.getEmail(), user.getRoles());
+        return APIResponse.ok(new UserRespDto(user.getEmail(), user.getRoles()), "User created");
     }
 
-    public LoginResponseDto loginUser(String userName, String password) {
+    public APIResponse<LoginResponseDto> loginUser(String userName, String password) {
         try {
             Authentication auth = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userName, password)
             );
             String token = tokenService.generateToken(auth);
-            return new LoginResponseDto(userName, token);
+
+            return APIResponse.ok(new LoginResponseDto(userName, token), "Logged in successfully");
 
         } catch(AuthenticationException e) {
-            return new LoginResponseDto("", "");
+            return APIResponse.unauthorized(new LoginResponseDto("", ""), "Login failed");
         }
     }
 }
