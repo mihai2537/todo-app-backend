@@ -7,6 +7,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.Collection;
 
+/**
+ * This is the Authentication instance used when the user is logged-in via Jwt token.
+ * The configuration is done via CustomAuthenticationConverter
+ * The main benefit of this class is accessing the logged-in user model via getPrincipal()
+ */
 public class UserToken extends AbstractAuthenticationToken {
 
     private final Jwt jwt;

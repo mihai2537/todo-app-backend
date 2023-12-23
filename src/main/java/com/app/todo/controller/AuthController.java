@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
     private final TokenService tokenService;
-    private AuthenticationService authService;
+    private final AuthenticationService authService;
 
     public AuthController(TokenService tokenService, AuthenticationService authService) {
         this.tokenService = tokenService;

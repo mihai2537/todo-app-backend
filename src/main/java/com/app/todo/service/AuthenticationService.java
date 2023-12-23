@@ -17,11 +17,11 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 public class AuthenticationService {
-    private UserRepository userRepo;
-    private PasswordEncoder passwordEncoder;
-    private AuthenticationManager authManager;
+    private final UserRepository userRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authManager;
 
-    private TokenService tokenService;
+    private final TokenService tokenService;
 
     public AuthenticationService(
             UserRepository userRepo,

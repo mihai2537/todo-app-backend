@@ -89,7 +89,7 @@ public class APIResponse <T> {
     }
 
     /**
-     * Creates an APIResponse for a internal server error.
+     * Creates an APIResponse for an internal server error.
      *
      * @param data             The data to include in the response.
      * @param <T>              The type of data to be included in the response.

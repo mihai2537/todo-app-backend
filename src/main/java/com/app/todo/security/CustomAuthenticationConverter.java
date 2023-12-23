@@ -3,6 +3,7 @@ package com.app.todo.security;
 import com.app.todo.model.User;
 import com.app.todo.repository.UserRepository;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,7 +29,7 @@ public class CustomAuthenticationConverter implements Converter<Jwt, AbstractAut
     }
 
     @Override
-    public AbstractAuthenticationToken convert(Jwt source) {
+    public AbstractAuthenticationToken convert(@NonNull Jwt source) {
         Collection<GrantedAuthority> authorities = jwtGrantedAuthoritiesConverter.convert(source);
 
         String email = source.getClaimAsString("sub");

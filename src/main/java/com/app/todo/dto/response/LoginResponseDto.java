@@ -1,18 +1,13 @@
 package com.app.todo.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class LoginResponseDto {
     private String email;
     private String jwt;
-
-    public LoginResponseDto(String email, String jwt) {
-        this.email = email;
-        this.jwt = jwt;
-    }
-
-    public LoginResponseDto() {}
 }

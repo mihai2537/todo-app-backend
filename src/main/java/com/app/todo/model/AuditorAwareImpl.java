@@ -1,6 +1,7 @@
 package com.app.todo.model;
 
 import com.app.todo.security.UserToken;
+import io.micrometer.common.lang.NonNullApi;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,6 +12,7 @@ import java.util.Optional;
 /**
  * This class is in charge of retrieving the auditor name when we need to populate the @CreatedBy fields
  */
+@NonNullApi
 public class AuditorAwareImpl implements AuditorAware<String> {
 
     @Override
