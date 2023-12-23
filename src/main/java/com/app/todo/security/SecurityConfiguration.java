@@ -1,5 +1,6 @@
 package com.app.todo.security;
 
+import com.app.todo.repository.UserRepository;
 import com.app.todo.utils.RsaKeyProperties;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,17 +23,17 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration  {
     private final RsaKeyProperties rsaKeys;
+    private final UserRepository userRepository;
 
-    public SecurityConfiguration(RsaKeyProperties rsaKeys) {
+    public SecurityConfiguration(RsaKeyProperties rsaKeys, UserRepository userRepository) {
         this.rsaKeys = rsaKeys;
+        this.userRepository = userRepository;
     }
 
     @Bean
@@ -58,6 +58,7 @@ public class SecurityConfiguration  {
                     auth.requestMatchers("/admin/**").hasRole("ADMIN");
                     auth.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN");
                     auth.requestMatchers(("/auth/**")).permitAll();
+                    auth.requestMatchers("/item/**").hasRole("USER");
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -82,13 +83,13 @@ public class SecurityConfiguration  {
         return new NimbusJwtEncoder(jwks);
     }
 
+    /**
+     * Creates a different kind of Principal and makes use of grantedAuthorities converter
+     * For more details see CustomAuthenticationConverter class
+     * @return CustomAuthenticationConverter
+     */
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-        jwtConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-        return jwtConverter;
+    public CustomAuthenticationConverter jwtAuthenticationConverter() {
+        return new CustomAuthenticationConverter(userRepository);
     }
 }
