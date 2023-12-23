@@ -1,10 +1,10 @@
 package com.app.todo.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name="users")
@@ -19,6 +19,9 @@ public class User extends AuditableEntity {
 
     @Column
     private String roles;
+
+    @OneToMany(fetch= FetchType.LAZY, mappedBy = "user")
+    private List<Item> items;
 
     public User(String email, String password, String roles) {
         this.email = email;
