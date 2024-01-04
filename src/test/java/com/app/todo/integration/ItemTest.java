@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -158,8 +159,28 @@ public class ItemTest {
         }
 
         itemRepo.saveAll(items);
-
         assertThat(itemRepo.findAll().size()).isEqualTo(3);
+
+        MvcResult result = mvc.perform(
+                        get(Endpoint.ITEM_SHOW.toString())
+                                .header("Authorization", "Bearer " + this.jwt)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items").exists())
+                .andExpect(jsonPath("$.data.items").isNotEmpty())
+                .andReturn();
+
+        APIResponse<ItemsResponseDto> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {}
+        );
+
+        assertThat(response.getData().getItems().size()).isEqualTo(3);
+    }
+
+    @Test
+    public void testShowItemsReturnsEmptyList() throws Exception{
+        assertThat(itemRepo.findAll().size()).isEqualTo(0);
 
         mvc.perform(
                         get(Endpoint.ITEM_SHOW.toString())
@@ -167,15 +188,7 @@ public class ItemTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.items").exists())
-                .andExpect(jsonPath("$.data.items").isNotEmpty())
-                .andDo(result -> {
-                    APIResponse<ItemsResponseDto> response = objectMapper.readValue(
-                           result.getResponse().getContentAsString(),
-                           new TypeReference<>() {}
-                   );
-
-                    assertThat(response.getData().getItems().size()).isEqualTo(3);
-                });
+                .andExpect(jsonPath("$.data.items").isEmpty());
     }
 
     // endpoint: delete
@@ -192,11 +205,11 @@ public class ItemTest {
         Item item = new Item();
         item.setUser(currentUser);
         item.setText(text);
-        item = itemRepo.save(item);
-        String idParam = "" + item.getId();
 
+        item = itemRepo.save(item);
         assertThat(itemRepo.findAll().size()).isEqualTo(1);
 
+        String idParam = "" + item.getId();
         mvc.perform(
                 delete(Endpoint.ITEM_DELETE.toString())
                         .param("id", idParam)
