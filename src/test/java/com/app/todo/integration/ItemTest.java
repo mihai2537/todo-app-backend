@@ -3,17 +3,20 @@ package com.app.todo.integration;
 import com.app.todo.dto.request.ItemReqDto;
 import com.app.todo.dto.request.LoginDto;
 import com.app.todo.dto.response.APIResponse;
+import com.app.todo.dto.response.ItemsResponseDto;
 import com.app.todo.dto.response.LoginResponseDto;
 import com.app.todo.model.Item;
 import com.app.todo.model.Role;
 import com.app.todo.model.User;
 import com.app.todo.repository.ItemRepository;
 import com.app.todo.repository.UserRepository;
-import com.app.todo.service.TokenService;
 import com.app.todo.utils.Endpoint;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -23,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -34,8 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 public class ItemTest {
-    @Autowired
-    private TokenService tokenService;
     @Autowired
     private MockMvc mvc;
     @Autowired
@@ -49,19 +51,17 @@ public class ItemTest {
     private String jwt = "";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        User user = new User();
-        user.setEmail("user@user.com");
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Role.USER.getValue());
-
-        currentUser = userRepo.save(user);
-
+    /**
+     * Local helper to send a login request and retrieve the jwt.
+     * this.currentUser data is used for the login request
+     * the jwt is then stored inside this.jwt and used inside other tests
+     * @throws Exception
+     */
+    private void authenticateUserAndSetJwt() throws Exception {
         // Get the JWT token by sending a login request
         LoginDto body = new LoginDto();
         body.setPassword(password);
-        body.setEmail(user.getEmail());
+        body.setEmail(currentUser.getEmail());
         mvc.perform(
                 post(Endpoint.LOGIN.toString())
                         .content(objectMapper.writeValueAsString(body))
@@ -75,6 +75,17 @@ public class ItemTest {
                     );
             this.jwt = response.getData().getJwt();
         });
+    }
+
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        User user = new User();
+        user.setEmail("user@user.com");
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Role.USER.getValue());
+
+        currentUser = userRepo.save(user);
+        this.authenticateUserAndSetJwt();
     }
 
     @AfterEach
@@ -130,6 +141,39 @@ public class ItemTest {
                 )
                 .andExpect(status().isOk());
 
+    }
+
+    @Test
+    public void testShowItemsReturnsThreeItems() throws Exception {
+        Item firstItem = new Item();
+        Item secondItem = new Item();
+        Item thirdItem = new Item();
+        Item[] itemsArr = new Item[] {firstItem, secondItem, thirdItem};
+        List<Item> items = Arrays.asList(itemsArr);
+
+        for (Item item : items) {
+            item.setUser(currentUser);
+        }
+
+        itemRepo.saveAll(items);
+
+        assertThat(itemRepo.findAll().size()).isEqualTo(3);
+
+        mvc.perform(
+                        get(Endpoint.ITEM_SHOW.toString())
+                                .header("Authorization", "Bearer " + this.jwt)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items").exists())
+                .andExpect(jsonPath("$.data.items").isNotEmpty())
+                .andDo(result -> {
+                    APIResponse<ItemsResponseDto> response = objectMapper.readValue(
+                           result.getResponse().getContentAsString(),
+                           new TypeReference<>() {}
+                   );
+
+                    assertThat(response.getData().getItems().size()).isEqualTo(3);
+                });
     }
 
     // endpoint: delete
