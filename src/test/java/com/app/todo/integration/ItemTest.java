@@ -55,7 +55,7 @@ public class ItemTest {
      * Local helper to send a login request and retrieve the jwt.
      * this.currentUser data is used for the login request
      * the jwt is then stored inside this.jwt and used inside other tests
-     * @throws Exception
+     * @throws Exception due to mvc perform call
      */
     private void authenticateUserAndSetJwt() throws Exception {
         // Get the JWT token by sending a login request
@@ -90,7 +90,7 @@ public class ItemTest {
 
     @AfterEach
     public void afterEach() {
-        currentUser = userRepo.findByEmail(currentUser.getEmail()).get();
+        currentUser = userRepo.findByEmail(currentUser.getEmail()).orElseThrow();
         userRepo.delete(currentUser);
     }
 
@@ -119,7 +119,9 @@ public class ItemTest {
                 )
                 .andExpect(status().isOk());
 
-        List<Item> items = userRepo.findByEmailWithItems(currentUser.getEmail()).get().getItems();
+        User user = userRepo.findByEmailWithItems(currentUser.getEmail()).orElse(new User());
+        List<Item> items = user.getItems();
+
         assertThat(items).isNotNull();
         assertThat(items.size()).isEqualTo(1);
         assertThat(items.get(0).getText()).isEqualTo(itemText);
