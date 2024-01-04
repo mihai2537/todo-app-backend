@@ -5,7 +5,10 @@ package com.app.todo.utils;
  */
 public enum Endpoint {
     LOGIN("/auth/login"),
-    REGISTER("/auth/register");
+    REGISTER("/auth/register"),
+    ITEM_SHOW("/item/show"),
+    ITEM_CREATE("/item/create"),
+    ITEM_DELETE("/item/delete");
 
     Endpoint(String s) {
         this.value = s;

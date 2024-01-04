@@ -20,7 +20,7 @@ public class User extends AuditableEntity {
     @Column
     private String roles;
 
-    @OneToMany(fetch= FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch= FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items;
 
     public User(String email, String password, String roles) {

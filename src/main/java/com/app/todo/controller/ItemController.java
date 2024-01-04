@@ -38,4 +38,13 @@ public class ItemController {
                 .status(HttpStatus.valueOf(resp.getHttpStatus()))
                 .body(resp);
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<APIResponse<ItemResponseDto>> deleteItem(@RequestParam long id, Authentication auth) {
+        APIResponse<ItemResponseDto> resp = itemService.deleteItem(id, (User)auth.getPrincipal());
+
+        return ResponseEntity
+                .status(HttpStatus.valueOf(resp.getHttpStatus()))
+                .body(resp);
+    }
 }

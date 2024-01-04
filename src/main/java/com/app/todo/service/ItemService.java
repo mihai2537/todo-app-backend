@@ -9,6 +9,7 @@ import com.app.todo.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ItemService {
@@ -50,6 +51,34 @@ public class ItemService {
         return APIResponse.ok(
                 new ItemsResponseDto(itemsDto),
                 "Items retrieved"
+        );
+    }
+
+    /**
+     * Deletes the item with the given id which belongs to the given user.
+     * @param id of the item
+     * @param user usually the logged-in user
+     * @return The deleted item if successful, dummy item otherwise.
+     */
+    public APIResponse<ItemResponseDto> deleteItem(long id, User user) {
+        Optional<Item> item = itemRepository.findByIdAndUser(id, user);
+        ItemResponseDto response = new ItemResponseDto();
+
+        response.setId(-1);
+        response.setText("");
+
+        if (item.isEmpty()) {
+            return APIResponse.notFound(response, "No such item was found");
+        }
+
+        response.setId(item.get().getId());
+        response.setText(item.get().getText());
+
+        itemRepository.delete(item.get());
+
+        return APIResponse.ok(
+                response,
+                "Item deleted"
         );
     }
 }
