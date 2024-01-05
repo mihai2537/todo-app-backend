@@ -221,4 +221,18 @@ public class ItemTest {
 
         assertThat(itemRepo.findAll().size()).isEqualTo(0);
     }
+
+    @Test
+    public void testDeleteItemReturnsNotFound_whenItemIdNotFound() throws Exception {
+        assertThat(itemRepo.findAll().size()).isEqualTo(0);
+
+        mvc.perform(
+                delete(Endpoint.ITEM_DELETE.toString())
+                        .param("id", "1")
+                        .header("Authorization", "Bearer " + this.jwt)
+        ).andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data.id").value(-1))
+                .andExpect(jsonPath("$.data.text").value(""));
+    }
 }
