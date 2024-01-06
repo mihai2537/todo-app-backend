@@ -7,16 +7,19 @@ import com.app.todo.dto.response.LoginResponseDto;
 import com.app.todo.dto.response.UserRespDto;
 import com.app.todo.service.AuthenticationService;
 import com.app.todo.service.TokenService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin("*")
+@Validated
 public class AuthController {
     private static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
     private final TokenService tokenService;
@@ -37,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<APIResponse<UserRespDto>> registerUser(@RequestBody RegistrationDto body) {
+    public ResponseEntity<APIResponse<UserRespDto>> registerUser(@Valid @RequestBody RegistrationDto body) {
         APIResponse<UserRespDto> resp = authService.registerUser(body.getEmail(), body.getPassword());
 
         return ResponseEntity
