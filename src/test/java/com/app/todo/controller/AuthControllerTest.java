@@ -109,6 +109,21 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("$.message").value("Email cannot be blank"));
     }
     @Test
+    public void testRegisterUser_failsWhenEmailLengthExceeded() throws Exception {
+        RegistrationDto dto = new RegistrationDto();
+        dto.setEmail("a".repeat(65) + "@user.com");
+        dto.setPassword("passwordLongEnough");
+
+        mockMvc.perform(
+                        post(Endpoint.REGISTER.toString())
+                                .content(objectMapper.writeValueAsString(dto))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Not a valid email format"));
+    }
+    @Test
     public void testRegisterUser_failsWithMissingBody() throws Exception {
         String expectedMsg = "Request body is missing or malformed. Please provide a valid request body.";
 
@@ -229,7 +244,7 @@ public class AuthControllerTest {
     @Test
     public void testLoginUser_failsWhenEmailLengthExceeded() throws Exception {
         LoginDto body = new LoginDto();
-        body.setEmail("a".repeat(256) + "@user.com");
+        body.setEmail("a".repeat(65) + "@user.com");
         body.setPassword("pass");
 
         mockMvc.perform(
@@ -239,7 +254,7 @@ public class AuthControllerTest {
                 )
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Email length cannot be bigger than 256"));
+                .andExpect(jsonPath("$.message").value("Not a valid email format"));
     }
 
     @Test
