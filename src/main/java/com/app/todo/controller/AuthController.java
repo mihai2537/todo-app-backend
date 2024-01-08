@@ -49,7 +49,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<APIResponse<LoginResponseDto>> loginUser(@RequestBody LoginDto body) {
+    public ResponseEntity<APIResponse<LoginResponseDto>> loginUser(@Valid @RequestBody LoginDto body) {
         APIResponse<LoginResponseDto> resp = authService.loginUser(body.getEmail(), body.getPassword());
 
         return ResponseEntity

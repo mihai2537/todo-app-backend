@@ -10,6 +10,7 @@ import com.app.todo.security.CustomUserDetailsService;
 import com.app.todo.security.SecurityConfiguration;
 import com.app.todo.service.AuthenticationService;
 import com.app.todo.service.TokenService;
+import com.app.todo.utils.Endpoint;
 import com.app.todo.utils.RsaKeyProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -191,5 +192,113 @@ public class AuthControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.email").value(""))
                 .andExpect(jsonPath("$.data.jwt").value(""));
+    }
+
+    @Test
+    public void testLoginUser_failsWhenEmailEmptyString() throws Exception {
+        LoginDto body = new LoginDto();
+        body.setEmail("");
+        body.setPassword("pass");
+
+        mockMvc.perform(
+                post(Endpoint.LOGIN.toString())
+                        .content(objectMapper.writeValueAsString(body))
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Email cannot be blank"));
+    }
+
+    @Test
+    public void testLoginUser_failsWhenEmailNull() throws Exception {
+        LoginDto body = new LoginDto();
+        body.setEmail(null);
+        body.setPassword("pass");
+
+        mockMvc.perform(
+                        post(Endpoint.LOGIN.toString())
+                                .content(objectMapper.writeValueAsString(body))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Email cannot be blank"));
+    }
+
+    @Test
+    public void testLoginUser_failsWhenEmailLengthExceeded() throws Exception {
+        LoginDto body = new LoginDto();
+        body.setEmail("a".repeat(256) + "@user.com");
+        body.setPassword("pass");
+
+        mockMvc.perform(
+                        post(Endpoint.LOGIN.toString())
+                                .content(objectMapper.writeValueAsString(body))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Email length cannot be bigger than 256"));
+    }
+
+    @Test
+    public void testLoginUser_failsWhenPasswordEmptyString() throws Exception {
+        LoginDto body = new LoginDto();
+        body.setEmail("ion@ion.com");
+        body.setPassword("");
+
+        mockMvc.perform(
+                        post(Endpoint.LOGIN.toString())
+                                .content(objectMapper.writeValueAsString(body))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Password cannot be blank"));
+    }
+
+    @Test
+    public void testLoginUser_failsWhenPasswordNull() throws Exception {
+        LoginDto body = new LoginDto();
+        body.setEmail("ion@ion.com");
+        body.setPassword(null);
+
+        mockMvc.perform(
+                        post(Endpoint.LOGIN.toString())
+                                .content(objectMapper.writeValueAsString(body))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Password cannot be blank"));
+    }
+
+    @Test
+    public void testLoginUser_failsWhenPasswordLengthExceeded() throws Exception {
+        LoginDto body = new LoginDto();
+        body.setEmail("ion@ion.com");
+        body.setPassword("p".repeat(257));
+
+        mockMvc.perform(
+                        post(Endpoint.LOGIN.toString())
+                                .content(objectMapper.writeValueAsString(body))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Password length cannot be bigger than 256"));
+    }
+
+    @Test
+    public void testLoginUser_failsWhenMissingBody() throws Exception {
+        String errMsg = "Request body is missing or malformed. Please provide a valid request body.";
+        mockMvc.perform(
+                        post(Endpoint.LOGIN.toString())
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(errMsg));
     }
  }
