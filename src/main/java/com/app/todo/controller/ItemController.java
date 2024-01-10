@@ -6,13 +6,16 @@ import com.app.todo.dto.response.ItemResponseDto;
 import com.app.todo.dto.response.ItemsResponseDto;
 import com.app.todo.model.User;
 import com.app.todo.service.ItemService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/item")
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
@@ -22,7 +25,7 @@ public class ItemController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<APIResponse<ItemResponseDto>> createItem(@RequestBody ItemReqDto body, Authentication auth) {
+    public ResponseEntity<APIResponse<ItemResponseDto>> createItem(@Valid @RequestBody ItemReqDto body, Authentication auth) {
         APIResponse<ItemResponseDto> resp = itemService.createItem(body.getText(), (User)auth.getPrincipal());
 
         return ResponseEntity
