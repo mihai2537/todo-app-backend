@@ -3,6 +3,7 @@ package com.app.todo.controller;
 import com.app.todo.dto.request.ItemReqDto;
 import com.app.todo.dto.response.APIResponse;
 import com.app.todo.dto.response.ItemResponseDto;
+import com.app.todo.dto.response.ItemsResponseDto;
 import com.app.todo.model.User;
 import com.app.todo.repository.UserRepository;
 import com.app.todo.security.CustomUserDetailsService;
@@ -25,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ItemController.class)
@@ -45,6 +46,8 @@ public class ItemControllerTest {
         mockMvc.perform(post(Endpoint.ITEM_CREATE.toString()).with(anonymous()))
                 .andExpect(status().isUnauthorized());
     }
+
+    /** create **/
 
     @Test
     @WithMockAuthentication(name = "user@noemail.com", principalType = User.class, authorities = {"ROLE_USER"})
@@ -125,5 +128,75 @@ public class ItemControllerTest {
         ).andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Text cannot be longer than 32"));
+    }
+
+    /** show **/
+    @Test
+    public void testShowFails_whenUserNotLoggedIn() throws Exception {
+        mockMvc.perform(post(Endpoint.ITEM_SHOW.toString()).with(anonymous()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockAuthentication(name =  "user@noemail.com", principalType = User.class, authorities = {"ROLE_USER"})
+    public void testShowWorks_whenUserLoggedIn() throws Exception {
+        APIResponse<ItemsResponseDto> resp = APIResponse.ok(new ItemsResponseDto(), "bla");
+        when(itemService.showItems(Mockito.any(User.class))).thenReturn(resp);
+
+        mockMvc.perform(
+                get(Endpoint.ITEM_SHOW.toString())
+        ).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data.items").hasJsonPath());
+    }
+
+    /** delete **/
+
+    @Test
+    public void testDeleteFails_whenUserNotLoggedIn() throws Exception {
+        mockMvc.perform(delete(Endpoint.ITEM_DELETE.toString()).with(anonymous()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockAuthentication(name = "user@noemail.com", principalType = User.class, authorities = {"ROLE_USER"})
+    public void testDeleteWorks_whenUserLoggedIn() throws Exception {
+        ItemResponseDto data = new ItemResponseDto();
+        APIResponse<ItemResponseDto> resp = APIResponse.ok(data, "bla");
+        long id = 1;
+
+        when(itemService.deleteItem(Mockito.anyLong(), Mockito.any(User.class))).thenReturn(resp);
+
+        mockMvc.perform(
+                delete(Endpoint.ITEM_DELETE.toString())
+                        .param("id", String.valueOf(id))
+        ).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.data.id").hasJsonPath())
+                .andExpect(jsonPath("$.data.text").hasJsonPath());
+    }
+
+    @Test
+    @WithMockAuthentication(name = "user@noemail.com", principalType = User.class, authorities = {"ROLE_USER"})
+    public void testDeleteFails_whenIdMissing() throws Exception {
+        mockMvc.perform(
+                delete(Endpoint.ITEM_DELETE.toString())
+        ).andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Parameter id of type long is missing!"))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    @WithMockAuthentication(name = "user@noemail.com", principalType = User.class, authorities = {"ROLE_USER"})
+    public void testDeleteFails_whenIdWrongType() throws Exception {
+        mockMvc.perform(
+                delete(Endpoint.ITEM_DELETE.toString()).param("id", "wrongVal")
+        ).andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Parameter id must be of type long"))
+                .andExpect(jsonPath("$.data").isEmpty());
     }
 }

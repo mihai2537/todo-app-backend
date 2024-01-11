@@ -5,8 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.stream.Collectors;
 
@@ -45,6 +47,30 @@ public class CustomExceptionHandler {
     ) {
         String errorMsg = "Request body is missing or malformed. Please provide a valid request body.";
         APIResponse<String> response = APIResponse.badRequest(null, errorMsg);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<APIResponse<String>> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException ex
+    ) {
+        String name = ex.getParameterName();
+        String type = ex.getParameterType();
+        String message = "Parameter " + name + " of type " + type + " is missing!";
+        APIResponse<String> response = APIResponse.badRequest(null, message);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<APIResponse<String>> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException ex
+    ) {
+        String paramName = ex.getName();
+        String requiredType = ex.getRequiredType().toString();
+        String message = "Parameter " + paramName + " must be of type " + requiredType;
+        APIResponse<String> response = APIResponse.badRequest(null, message);
+
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
