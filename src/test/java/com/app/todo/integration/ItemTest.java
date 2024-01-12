@@ -34,7 +34,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// By default the life cycle is per method, so a new test instance is created for every test method.
+// By default, the life cycle is per method, so a new test instance is created for every test method.
 // With per class, we can also get rid of the static beforeEach
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
