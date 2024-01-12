@@ -6,7 +6,6 @@ import com.app.todo.dto.response.UserRespDto;
 import com.app.todo.model.Role;
 import com.app.todo.model.User;
 import com.app.todo.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@Transactional
 public class AuthenticationService {
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
