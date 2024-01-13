@@ -10,10 +10,12 @@ import com.app.todo.security.CustomUserDetailsService;
 import com.app.todo.security.SecurityConfiguration;
 import com.app.todo.service.AuthenticationService;
 import com.app.todo.service.TokenService;
+import com.app.todo.service.UserService;
 import com.app.todo.utils.Endpoint;
 import com.app.todo.utils.RsaKeyProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,7 +40,8 @@ public class AuthControllerTest {
     // The userRepository is needed by the SecurityConfiguration
     @MockBean
     private UserRepository userRepository;
-
+    @MockBean
+    private UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -122,6 +125,24 @@ public class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Not a valid email format"));
+    }
+    @Test
+    public void testRegisterUser_failsWhenEmailAlreadyExists() throws Exception {
+        String email = "user@noemail.com";
+        String pass = "passwordLongEnough";
+        RegistrationDto dto = new RegistrationDto();
+        dto.setEmail(email);
+        dto.setPassword(pass);
+
+        when(userService.fieldValueExists(Mockito.any(), Mockito.anyString())).thenReturn(true);
+
+        mockMvc.perform(
+                post(Endpoint.REGISTER.toString())
+                        .content(objectMapper.writeValueAsString(dto))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Email is already used!"));
     }
     @Test
     public void testRegisterUser_failsWithMissingBody() throws Exception {

@@ -1,5 +1,7 @@
 package com.app.todo.dto.request;
 
+import com.app.todo.service.UserService;
+import com.app.todo.validator.Unique;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +13,7 @@ import lombok.Setter;
 @Setter
 public class RegistrationDto {
     @Email(message = "Not a valid email format")
+    @Unique(service = UserService.class, fieldName = "email", message = "Email is already used!")
     @NotBlank(message = "Email cannot be blank")
     private String email;
 
