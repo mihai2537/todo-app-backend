@@ -60,7 +60,7 @@ public class ItemControllerTest {
         data.setId(1);
         APIResponse<ItemResponseDto> resp = APIResponse.ok(data, "bla");
 
-        when(itemService.createItem(eq(body.getText()), Mockito.any(User.class))).thenReturn(resp);
+        when(itemService.createItemConstrainedCapacity(eq(body.getText()), Mockito.any(User.class))).thenReturn(resp);
 
         mockMvc.perform(
                 post(Endpoint.ITEM_CREATE.toString())

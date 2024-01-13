@@ -26,7 +26,10 @@ public class ItemController {
 
     @PostMapping("/create")
     public ResponseEntity<APIResponse<ItemResponseDto>> createItem(@Valid @RequestBody ItemReqDto body, Authentication auth) {
-        APIResponse<ItemResponseDto> resp = itemService.createItem(body.getText(), (User)auth.getPrincipal());
+        APIResponse<ItemResponseDto> resp = itemService.createItemConstrainedCapacity(
+                body.getText(),
+                (User)auth.getPrincipal()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.valueOf(resp.getHttpStatus()))

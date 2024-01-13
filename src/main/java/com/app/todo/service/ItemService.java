@@ -14,6 +14,7 @@ import java.util.Optional;
 @Service
 public class ItemService {
 
+    private final long ITEMS_CAPACITY = 6;
     private final ItemRepository itemRepository;
 
     public ItemService(ItemRepository itemRepository) {
@@ -34,6 +35,20 @@ public class ItemService {
                 new ItemResponseDto(item.getId(), item.getText()),
                 "Item created successfully"
         );
+    }
+
+    /**
+     * Create item only if the count of items is below a preset limit
+     * @param text the item's text
+     * @param user the currently logged-in user
+     * @return the response containing the created item or status forbidden if limit is reached already.
+     */
+    public APIResponse<ItemResponseDto> createItemConstrainedCapacity(String text, User user) {
+        if (isItemsCapacityReached(user)) {
+            return APIResponse.forbidden(null, "You cannot have more than " + ITEMS_CAPACITY + " items");
+        }
+
+        return createItem(text, user);
     }
 
     /**
@@ -80,5 +95,21 @@ public class ItemService {
                 response,
                 "Item deleted"
         );
+    }
+
+    /**
+     * Get the total number of items the given user has.
+     * @param user who has the items
+     * @return the number of items the user detains.
+     */
+    public long countAllByUser(User user) {
+        return itemRepository.countAllByUser(user);
+    }
+
+    private boolean isItemsCapacityReached(User user) {
+        long count = countAllByUser(user);
+        if (count >= ITEMS_CAPACITY) return true;
+
+        return false;
     }
 }

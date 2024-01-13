@@ -13,6 +13,7 @@ import com.app.todo.repository.UserRepository;
 import com.app.todo.utils.Endpoint;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -106,6 +108,33 @@ public class ItemTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void testCreateItemFails_whenLimitExceeded() throws Exception {
+        List<Item> items = new ArrayList<>();
+        items.add(new Item("bla", currentUser));
+        items.add(new Item("bla", currentUser));
+        items.add(new Item("bla", currentUser));
+        items.add(new Item("bla", currentUser));
+        items.add(new Item("bla", currentUser));
+        items.add(new Item("bla", currentUser));
+
+        itemRepo.saveAll(items);
+        Assertions.assertThat(itemRepo.countAllByUser(currentUser)).isEqualTo(items.size());
+
+        ItemReqDto body = new ItemReqDto();
+        body.setText("bla");
+
+        mvc.perform(
+                post(Endpoint.ITEM_CREATE.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body))
+                        .header("Authorization", "Bearer " + this.jwt)
+        ).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.data").isEmpty());
+
+        Assertions.assertThat(itemRepo.countAllByUser(currentUser)).isEqualTo(items.size());
     }
 
     @Test

@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllByUser(User user);
     Optional<Item> findByIdAndUser(long id, User user);
+    long countAllByUser(User user);
 }

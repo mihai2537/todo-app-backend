@@ -28,4 +28,9 @@ public class Item extends AuditableEntity {
     public Item(String text) {
         this.text = text;
     }
+
+    public Item(String text, User user) {
+        this.text = text;
+        this.user = user;
+    }
 }

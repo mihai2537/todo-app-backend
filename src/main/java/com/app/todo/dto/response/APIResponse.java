@@ -57,6 +57,22 @@ public class APIResponse <T> {
     }
 
     /**
+     * Creates an APIResponse for a forbidden operation.
+     *
+     * @param data             The data to include in the response.
+     * @param <T>              The type of data to be included in the response.
+     * @return An APIResponse indicating a failed operation.
+     */
+    public static <T> APIResponse<T> forbidden(T data, String message) {
+        return APIResponse.<T>builder()
+                .httpStatus(HttpStatus.FORBIDDEN.value())
+                .status(HttpStatus.FORBIDDEN.getReasonPhrase())
+                .message(message)
+                .data(data)
+                .build();
+    }
+
+    /**
      * Creates an APIResponse for a not found operation.
      *
      * @param data             The data to include in the response.
