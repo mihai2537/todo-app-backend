@@ -150,9 +150,9 @@ public class ItemTest {
 
     @Test
     public void testShowItemsReturnsThreeItems() throws Exception {
-        Item firstItem = new Item();
-        Item secondItem = new Item();
-        Item thirdItem = new Item();
+        Item firstItem = new Item("bla");
+        Item secondItem = new Item("bla");
+        Item thirdItem = new Item("bla");
         Item[] itemsArr = new Item[] {firstItem, secondItem, thirdItem};
         List<Item> items = Arrays.asList(itemsArr);
 

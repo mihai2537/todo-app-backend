@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +14,8 @@ import lombok.Setter;
 @Setter
 public class Item extends AuditableEntity {
     @Column(length = 64)
+    @NotBlank
+    @Size(max = 32)
     private String text = "";
 
     @ManyToOne()
