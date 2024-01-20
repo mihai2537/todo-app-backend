@@ -22,8 +22,8 @@ jobs:
 
       - name: Build with Maven
         env:
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          APPSETTING_DB_USER: ${{ secrets.DB_USER }}
+          APPSETTING_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: mvn clean install
 
       - name: Upload artifact for deployment job
